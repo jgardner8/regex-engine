@@ -2,7 +2,7 @@ A regular expression engine created for learning purposes. Could serve as a good
 
 Uses a recursive descent parser to create an AST. 
 Has three evaluation methods:
-	* Derivatives
-	* Non-deterministic finite automata (NFA)
-	* Deterministic finite automata (DFA)
+* Derivatives
+* Non-deterministic finite automata (NFA)
+* Deterministic finite automata (DFA)
 
