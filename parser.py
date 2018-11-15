@@ -27,7 +27,8 @@ class _RegexParser:
 
     def _eat(self, char):
         '''Consumes the next char of input_str, failing if not equal to char'''
-        assert self._peek() == char, 'Expected: {0}, got: {1}'.format(char, self._peek())
+        assert self._peek() == char, 'Expected: {0}, got: {1}, at position: {2}'.format(
+            char, self._peek(), self.input_index)
         self.input_index += 1
 
     def _next(self):
@@ -81,7 +82,7 @@ class _RegexParser:
             elif char == '?':
                 base = adt.Optional(base)
             else:
-                raise ValueError('Expected: *, + or ?, got: {0}'.format(char))
+                raise ValueError('Expected: *, + or ?, got: {0}, at position'.format(char, self.input_index))
 
         return base
 
@@ -111,7 +112,7 @@ class _RegexParser:
 
     def _backslash_char(self):
         '''
-        <backslash-char> ::- '\' <escaped-char>
+        <backslash-char> ::= '\' <escaped-char>
                              '\' <char-class-shorthand>
         '''
         char = self._next()
