@@ -57,3 +57,21 @@ class TestParser(unittest.TestCase):
             char_sequence_from_str('+-_.()'),
             'Escaping: lots'
         )
+
+        self.assertEqual(
+            parse_regex('a{15}'),
+            sequence_tree_from_regexes([Char('a')]*15),
+            'Parse {15} quantifier'
+        )
+
+        self.assertEqual(
+            parse_regex('a{15,}'),
+            sequence_tree_from_regexes([Char('a')]*15 + [ZeroOrMore(Char('a'))]),
+            'Parse {15,} quantifier'
+        )
+
+        self.assertEqual(
+            parse_regex('a{15,17}'),
+            sequence_tree_from_regexes([Char('a')]*15 + [Optional(Char('a'))]*2),
+            'Parse {15,17} quantifier'
+        )

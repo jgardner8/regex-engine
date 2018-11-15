@@ -176,7 +176,7 @@ class Char(Regex):
         return self.char
 
     def to_regex(self):
-        if self.char in ('(', ')', '\\', '.', '|', '*', '+', '[', ']'):
+        if self.char in ('(', ')', '\\', '.', '|', '*', '+', '[', ']', '{', '}'):
             return '\{0}'.format(self.char)
         return self.char
 

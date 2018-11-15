@@ -13,7 +13,8 @@ class MultipleMethodsTester:
         self.unittest = unittest
 
     def _failure_details(self, s, invert=False):
-        return 'method failed: "{0}" did {1}match "{2}"'.format(self.regex, '' if invert else 'not ', s)
+        return 'method failed: "{0}" (parsed to {1}) did {2}match "{3}"'.format(
+            self.regex, self.ast.to_regex(), '' if invert else 'not ', s)
 
     def assert_matches(self, s):
         self.unittest.assertTrue(self.ast.matches(s), 'Derivative {0}'.format(self._failure_details(s)))
@@ -230,3 +231,22 @@ class TestEndToEnd(unittest.TestCase):
         tester.assert_matches('\n\\')
         tester.assert_not_matches('aa')
         tester.assert_not_matches('a ')
+
+    def test_end_to_end_quantifiers(self):
+        tester = MultipleMethodsTester(self, 'a{3}')
+        tester.assert_not_matches('aa')
+        tester.assert_matches('aaa')
+        tester.assert_not_matches('aaaa')
+
+        tester = MultipleMethodsTester(self, 'a{3,}')
+        tester.assert_not_matches('aa')
+        tester.assert_matches('aaa')
+        tester.assert_matches('aaaa')
+        tester.assert_matches('aaaaaaa')
+
+        tester = MultipleMethodsTester(self, 'a{3,5}')
+        tester.assert_not_matches('aa')
+        tester.assert_matches('aaa')
+        tester.assert_matches('aaaa')
+        tester.assert_matches('aaaaa')
+        tester.assert_not_matches('aaaaaa')

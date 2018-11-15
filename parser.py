@@ -70,10 +70,10 @@ class _RegexParser:
         return adt_fancy_constructors.sequence_tree_from_regexes(factors)
 
     def _factor(self):
-        '''<factor> ::= <base> { '*' | '+' | '?' }'''
+        '''<factor> ::= <base> { '*' | '+' | '?' | '{' <quantifier> '}' }'''
         base = self._base()
-
-        while self._more() and self._peek() in ('*', '+', '?'):
+ 
+        while self._more() and self._peek() in ('*', '+', '?', '{'):
             char = self._next()
             if char == '*':
                 base = adt.ZeroOrMore(base)
@@ -81,6 +81,9 @@ class _RegexParser:
                 base = adt.Sequence(base, adt.ZeroOrMore(base)) # a+ = aa*
             elif char == '?':
                 base = adt.Optional(base)
+            elif char == '{':
+                base = self._quantifier(base)
+                self._eat('}')
             else:
                 raise ValueError('Expected: *, + or ?, got: {0}, at position'.format(char, self.input_index))
 
@@ -109,6 +112,32 @@ class _RegexParser:
         elif char == '\\':
             return self._backslash_char()
         return adt.Char(char)
+
+    def _quantifier(self, regex):
+        '''
+        <quantifier> ::= <int>
+                      |  <int> ','
+                      |  <int> ',' <int>
+        '''
+        lower_bound = self._int()
+        repeated = [regex] * lower_bound # a{3} = aaa
+
+        if self._peek() != '}':
+            self._eat(',')
+            if self._peek() == '}':
+                repeated.append(adt.ZeroOrMore(regex)) # a{3,} = aaaa*
+            else:
+                upper_bound = self._int()
+                repeated.extend([adt.Optional(regex)] * (upper_bound-lower_bound)) # a{3,5} = aaaa?a?
+
+        return adt_fancy_constructors.sequence_tree_from_regexes(repeated)
+
+    def _int(self):
+        ''' [0-9]+ '''
+        digits = [self._next()]
+        while self._more() and str.isdigit(self._peek()):
+            digits.append(self._next())
+        return int(''.join(digits))
 
     def _backslash_char(self):
         '''
