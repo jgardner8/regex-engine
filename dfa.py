@@ -8,6 +8,10 @@ class DFAState:
         self.is_accepting = is_accepting
         self.on_char = {}
 
+    def is_trap(self):
+        '''A state is a trap if it is not accepting and it has no exits except looping back on itself'''
+        return not self.is_accepting and self.on_char == {} and self.on_char['random-val'] == self
+
     def on_unmatched_char(self, state=None):
         '''Used by AnyChar and inverted CharClass to avoid enumerating every possible character'''
         if state:
@@ -42,7 +46,7 @@ class DFAState:
         state = self
         biggest_match = None
 
-        while left:
+        while left and not state.is_trap():
             if state.is_accepting:
                 biggest_match = consumed
 
