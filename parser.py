@@ -46,8 +46,7 @@ class _RegexParser:
     #
     def _regex(self):
         '''
-        <regex> ::= <term> '|' <regex>
-                 |  <term>       
+        <regex> ::= <term> [ '|' <regex> ]
         '''
         term = self._term()
 
@@ -91,11 +90,11 @@ class _RegexParser:
 
     def _base(self):
         '''
-        <base> ::= <char>
-                |  '.'
+        <base> ::= '.'
                 |  '\' <backslash-char>
                 |  '(' <regex> ')'  
                 |  '[' <char-class> ']'
+                |  <char>
         '''
         char = self._next()
 
@@ -115,9 +114,7 @@ class _RegexParser:
 
     def _quantifier(self, regex):
         '''
-        <quantifier> ::= <int>
-                      |  <int> ','
-                      |  <int> ',' <int>
+        <quantifier> ::= <int> [ ',' [ <int> ] ]
         '''
         lower_bound = self._int()
         repeated = [regex] * lower_bound # a{3} = aaa
@@ -141,8 +138,8 @@ class _RegexParser:
 
     def _backslash_char(self):
         '''
-        <backslash-char> ::= '\' <escaped-char>
-                             '\' <char-class-shorthand>
+        <backslash-char> ::= '\' <char-class-shorthand>
+                          |  '\' <escaped-char>
         '''
         char = self._next()
 
@@ -163,7 +160,7 @@ class _RegexParser:
         return adt.Char(char) # escaped char
 
     def _char_class(self):
-        '''<char-class> ::= [ '^' ] { <char> '-' <char> | <char> | '\' <char> }'''
+        '''<char-class> ::= [ '^' ] { <char> '-' <char> | '\' <char> | <char> }'''
         if self._peek() == '^':
             invert = True
             self._eat('^')
