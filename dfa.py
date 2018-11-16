@@ -25,12 +25,33 @@ class DFAState:
     def matches(self, s):
         return self.is_accepting if len(s) == 0 else self.on_char[s[0]].matches(s[1:])
 
+    def find_longest_match(self, consumed, left):
+        ''' Find longest possible match for string `left` given we've already traversed chars `consumed`'''
+        this_match = consumed if self.is_accepting else None
+        if len(left) == 0:
+            return this_match
+
+        bigger_match = self.on_char[left[0]].find_longest_match(consumed+left[0], left[1:])
+        return bigger_match or this_match
+
 class DFA:
     def __init__(self, entry):
         self.entry = entry
 
     def matches(self, s):
+        ''' True if DFA matches the entire string s '''
         return self.entry.matches(s)
+
+    def find_subset_matches(self, s):
+        ''' For each position in s, finds the longest possible match, returning a list of matches '''
+        matches = []
+        while s:
+            match = self.entry.find_longest_match('', s)
+            if match not in (None, ''): # None is non-match, '' is match of length 0 (e.g. a* against b)
+                if not any(match in m for m in matches): # subset of something we've previously found
+                    matches.append(match)
+            s = s[1:]
+        return matches
 
 def from_nfa(nfa):
     '''Create a DFA from an NFA, i.e. return a version of nfa that is deterministic'''
