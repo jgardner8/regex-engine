@@ -30,19 +30,7 @@ class DFAState:
         return self.is_accepting if len(s) == 0 else self.on_char[s[0]].matches(s[1:])
 
     def find_longest_match(self, consumed, left):
-        ''' Find longest possible match for string `left` given we've already traversed chars `consumed`'''
-        this_match = consumed if self.is_accepting else None
-        if len(left) == 0:
-            return this_match
-
-        bigger_match = self.on_char[left[0]].find_longest_match(consumed+left[0], left[1:])
-        return bigger_match or this_match
-
-    def find_longest_match_iter(self, consumed, left):
-        ''' 
-        Find longest possible match for string `left` given we've already traversed chars `consumed`
-        This version, unlike find_longest_match, works iteratively so it won't stack overflow on long strings
-        '''
+        ''' Find longest possible match for string `left` given we've already traversed chars `consumed` '''
         state = self
         biggest_match = None
 
@@ -68,7 +56,7 @@ class DFA:
         ''' For each position in s, finds the longest possible match, returning a list of matches '''
         matches = []
         while s:
-            match = self.entry.find_longest_match_iter('', s)
+            match = self.entry.find_longest_match('', s)
             if match not in (None, ''): # None is non-match, '' is match of length 0 (e.g. a* against b)
                 if not any(match in m for m in matches): # subset of something we've previously found
                     matches.append(match)
